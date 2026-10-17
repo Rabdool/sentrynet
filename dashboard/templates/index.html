@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SentryNet — Alert Feed</title>
+  <style>
+    :root { color-scheme: dark; }
+    body { margin: 0; font: 15px/1.5 system-ui, sans-serif; background: #0f1419; color: #e6e6e6; }
+    header { padding: 16px 20px; border-bottom: 1px solid #222a33; }
+    header h1 { margin: 0; font-size: 18px; }
+    header .sub { color: #8a97a5; font-size: 13px; }
+    .counts { display: flex; gap: 10px; padding: 14px 20px; flex-wrap: wrap; }
+    .tile { background: #161c24; border: 1px solid #222a33; border-radius: 8px; padding: 8px 14px; min-width: 72px; }
+    .tile .n { font-size: 20px; font-weight: 700; }
+    .tile .l { font-size: 12px; color: #8a97a5; text-transform: uppercase; letter-spacing: .04em; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 10px 20px; border-bottom: 1px solid #1b222b; }
+    th { font-size: 12px; color: #8a97a5; text-transform: uppercase; letter-spacing: .04em; }
+    tr.ack { opacity: .5; }
+    .sev { font-weight: 700; padding: 2px 8px; border-radius: 999px; font-size: 12px; }
+    .sev.high { background: #3a1416; color: #ff7a85; }
+    .sev.medium { background: #3a2c12; color: #ffc46b; }
+    .sev.low { background: #12303a; color: #6bd0ff; }
+    button { background: #1f6feb; color: #fff; border: 0; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 13px; }
+    .done { color: #4caf7d; font-size: 13px; }
+    .empty { padding: 40px 20px; color: #8a97a5; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SentryNet</h1>
+    <div class="sub">Honeypot alert feed</div>
+  </header>
+
+  <div class="counts">
+    <div class="tile"><div class="n">{{ counts.unacknowledged }}</div><div class="l">Open</div></div>
+    <div class="tile"><div class="n">{{ counts.high }}</div><div class="l">High</div></div>
+    <div class="tile"><div class="n">{{ counts.medium }}</div><div class="l">Medium</div></div>
+    <div class="tile"><div class="n">{{ counts.low }}</div><div class="l">Low</div></div>
+  </div>
+
+  {% if alerts %}
+  <table>
+    <thead>
+      <tr><th>Severity</th><th>Message</th><th>Time</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for a in alerts %}
+      <tr class="{{ 'ack' if a['acknowledged'] else '' }}">
+        <td><span class="sev {{ a['severity'] }}">{{ a['severity'] }}</span></td>
+        <td>{{ a['message'] }}</td>
+        <td>{{ a['created_at'] }}</td>
+        <td>
+          {% if a['acknowledged'] %}
+            <span class="done">acknowledged</span>
+          {% else %}
+            <form method="post" action="{{ url_for('acknowledge', alert_id=a['id']) }}">
+              <button type="submit">Acknowledge</button>
+            </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="empty">No alerts yet — the honeypot layer hasn't reported any activity.</p>
+  {% endif %}
+</body>
+</html>
