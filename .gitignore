@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+# Honeypot runtime data / logs / DBs — never commit captured data or secrets
+*.log
+*.db
+*.sqlite
+*.sqlite3
+data/*.json
+data/dumps/
+# Secrets
+.env
+*.pem
+*.key
+# OS
+.DS_Store
