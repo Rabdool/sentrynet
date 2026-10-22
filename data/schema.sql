@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS attack_log (
 CREATE TABLE IF NOT EXISTS alert (
     id          INTEGER PRIMARY KEY,
     log_id      INTEGER NOT NULL REFERENCES attack_log(id),
+    alert_type  TEXT NOT NULL DEFAULT 'event',  -- brute_force, port_scan, unauthorized_access, ...
     severity    TEXT NOT NULL,          -- low | medium | high
     message     TEXT NOT NULL,
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
