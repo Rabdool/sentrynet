@@ -7,7 +7,9 @@
   <style>
     :root { color-scheme: dark; }
     body { margin: 0; font: 15px/1.5 system-ui, sans-serif; background: #0f1419; color: #e6e6e6; }
-    header { padding: 16px 20px; border-bottom: 1px solid #222a33; }
+    header { padding: 16px 20px; border-bottom: 1px solid #222a33; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .who { color: #8a97a5; font-size: 13px; display: flex; align-items: center; gap: 10px; }
+    .who button { background: #222a33; }
     header h1 { margin: 0; font-size: 18px; }
     header .sub { color: #8a97a5; font-size: 13px; }
     .counts { display: flex; gap: 10px; padding: 14px 20px; flex-wrap: wrap; }
@@ -29,8 +31,17 @@
 </head>
 <body>
   <header>
-    <h1>SentryNet</h1>
-    <div class="sub">Honeypot alert feed</div>
+    <div>
+      <h1>SentryNet</h1>
+      <div class="sub">Honeypot alert feed</div>
+    </div>
+    <div class="who">
+      Signed in as <strong>{{ current_user['username'] }}</strong>
+      <form method="post" action="{{ url_for('logout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit">Sign out</button>
+      </form>
+    </div>
   </header>
 
   <div class="counts">
@@ -56,6 +67,7 @@
             <span class="done">acknowledged</span>
           {% else %}
             <form method="post" action="{{ url_for('acknowledge', alert_id=a['id']) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button type="submit">Acknowledge</button>
             </form>
           {% endif %}
