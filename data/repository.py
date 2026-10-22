@@ -1,6 +1,6 @@
 """Data-access helpers for the SentryNet store.
 
-Thin wrappers over the four tables in ``schema.sql`` so the honeypot,
+Thin wrappers over the tables in ``schema.sql`` so the honeypot,
 alerting and dashboard layers never embed SQL of their own.
 """
 from __future__ import annotations
@@ -65,12 +65,37 @@ def acknowledge_alert(conn: sqlite3.Connection, alert_id: int) -> None:
     conn.commit()
 
 
+def create_user(
+    conn: sqlite3.Connection, username: str, password_hash: str, role: str = "admin"
+) -> int:
+    cur = conn.execute(
+        "INSERT INTO user (username, password_hash, role) VALUES (?, ?, ?)",
+        (username, password_hash, role),
+    )
+    conn.commit()
+    return cur.lastrowid
+
+
+def record_login(conn: sqlite3.Connection, user_id: int) -> None:
+    conn.execute("UPDATE user SET last_login = ? WHERE id = ?", (_now(), user_id))
+    conn.commit()
+
+
 # --- reads ------------------------------------------------------------------
 
 def recent_alerts(conn: sqlite3.Connection, limit: int = 50) -> list[sqlite3.Row]:
     return conn.execute(
         "SELECT * FROM alert ORDER BY created_at DESC, id DESC LIMIT ?", (limit,)
     ).fetchall()
+
+
+def get_user_by_username(conn: sqlite3.Connection, username: str) -> sqlite3.Row | None:
+    return conn.execute("SELECT * FROM user WHERE username = ?", (username,)).fetchone()
+
+
+def get_user(conn: sqlite3.Connection, user_id: int) -> sqlite3.Row | None:
+    return conn.execute("SELECT * FROM user WHERE id = ?", (user_id,)).fetchone()
+
 
 def login_attempts_from_ip(conn: sqlite3.Connection, src_ip: str) -> int:
     """Count login-attempt events seen from an IP across all its sessions."""

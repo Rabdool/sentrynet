@@ -31,3 +31,12 @@ CREATE TABLE IF NOT EXISTS alert (
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     acknowledged INTEGER DEFAULT 0
 );
+
+-- Dashboard administrators (Chapter Four, Table 4.1). Passwords are bcrypt hashes.
+CREATE TABLE IF NOT EXISTS user (
+    id            INTEGER PRIMARY KEY,
+    username      TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    role          TEXT NOT NULL DEFAULT 'admin',
+    last_login    TIMESTAMP
+);
