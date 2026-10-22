@@ -23,3 +23,11 @@ Then sign in at http://127.0.0.1:5000/login.
 ```
 python -m unittest discover -s tests
 ```
+
+## Evaluation (Objective 6)
+```
+python -m evaluation.run_evaluation
+```
+Drives the detection pipeline with brute-force, port-scan, unauthorized-access
+and benign-control traffic and reports detection accuracy, latency and logging
+completeness. See `evaluation/UAT_RUNBOOK.md` for the formal Nmap/Hydra lab test.
