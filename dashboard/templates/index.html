@@ -71,7 +71,7 @@
             <tr class="{{ 'ack' if a['acknowledged'] else '' }}">
               <td><span class="sev {{ a['severity'] }}">{{ a['severity'] }}</span></td>
               <td class="msg">{{ a['message'] }}</td>
-              <td class="time">{{ a['created_at'] }}</td>
+              <td class="time">{{ a['created_at']|localtime }}</td>
               <td>
                 {% if a['acknowledged'] %}
                   <span class="done">✓ acknowledged</span>

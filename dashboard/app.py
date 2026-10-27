@@ -19,6 +19,7 @@ import functools
 import hmac
 import os
 import secrets
+from datetime import datetime, timezone
 
 import click
 from flask import Flask, abort, flash, g, redirect, render_template, request, session, url_for
@@ -75,6 +76,17 @@ def create_app(db_path: str | None = None, secret_key: str | None = None) -> Fla
             expected = session.get("csrf_token")
             if not expected or not hmac.compare_digest(sent, expected):
                 abort(400)
+
+    @app.template_filter("localtime")
+    def _localtime(value) -> str:
+        """Render a stored UTC timestamp in the server's local time zone."""
+        try:
+            moment = datetime.fromisoformat(str(value))
+        except ValueError:
+            return value
+        if moment.tzinfo is None:
+            moment = moment.replace(tzinfo=timezone.utc)
+        return moment.astimezone().strftime("%Y-%m-%d %H:%M:%S")
 
     @app.context_processor
     def _csrf_token():
