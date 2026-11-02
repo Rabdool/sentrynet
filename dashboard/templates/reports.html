@@ -7,25 +7,8 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='sentrynet.css') }}">
 </head>
 <body class="reports-page">
-  <header class="topbar">
-    <div class="left">
-      <div>
-        <h1 class="brand">SentryNet</h1>
-        <div class="sub">Activity reports</div>
-      </div>
-      <nav class="tabs" aria-label="Sections">
-        <a href="{{ url_for('index') }}">Alert feed</a>
-        <a href="{{ url_for('reports') }}" class="active" aria-current="page">Reports</a>
-      </nav>
-    </div>
-    <div class="who">
-      <span>Signed in as <strong>{{ current_user['username'] }}</strong></span>
-      <form method="post" action="{{ url_for('logout') }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button type="submit" class="btn">Sign out</button>
-      </form>
-    </div>
-  </header>
+  {% set active, subtitle = 'reports', 'Activity reports' %}
+  {% include "_topbar.html" %}
 
   <main>
     <section class="panel hud no-print">
@@ -40,7 +23,7 @@
     {% if summary %}
     <section class="panel hud report">
       <div class="panel-head">
-        <h2>Report: {{ first.isoformat() }} to {{ last.isoformat() }}</h2>
+        <h2>Report: <span class="num">{{ first.isoformat() }}</span> to <span class="num">{{ last.isoformat() }}</span></h2>
         <div class="right no-print">
           <a class="btn" href="{{ url_for('export_report', start=first.isoformat(), end=last.isoformat()) }}">Export CSV</a>
           <button type="button" class="btn" onclick="window.print()">Print / PDF</button>

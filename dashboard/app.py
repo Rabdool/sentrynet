@@ -58,6 +58,20 @@ def _report_period(args) -> tuple[date, date, datetime, datetime]:
     return first, last, start, end
 
 
+def _sparkline(counts: list[int], width: int = 240, height: int = 44) -> dict:
+    """SVG coordinates for the alerts-per-hour line on the Open card.
+
+    Returns the polyline points and the closed area under it; a flat line at
+    the bottom means no alerts in that hour.
+    """
+    peak = max(counts) or 1
+    step = width / max(len(counts) - 1, 1)
+    pts = [(round(i * step, 1), round(height - 3 - (n / peak) * (height - 8), 1)) for i, n in enumerate(counts)]
+    line = " ".join(f"{x},{y}" for x, y in pts)
+    area = f"0,{height} {line} {width},{height}"
+    return {"line": line, "area": area, "width": width, "height": height, "total": sum(counts), "peak": max(counts)}
+
+
 def _csv_safe(value) -> str:
     """Neutralise spreadsheet formulas (CSV injection) in exported cells."""
     text = "" if value is None else str(value)
@@ -177,7 +191,10 @@ def create_app(db_path: str | None = None, secret_key: str | None = None) -> Fla
             counts[a["severity"]] = counts.get(a["severity"], 0) + 1
             if not a["acknowledged"]:
                 counts["unacknowledged"] += 1
-        return render_template("index.html", alerts=alerts, counts=counts)
+        hourly = repository.alerts_per_hour(get_conn(), datetime.now(timezone.utc))
+        return render_template(
+            "index.html", alerts=alerts, counts=counts, hourly=hourly, spark=_sparkline(hourly)
+        )
 
     @app.route("/alerts/<int:alert_id>/ack", methods=["POST"])
     @login_required

@@ -6,7 +6,7 @@ alerting and dashboard layers never embed SQL of their own.
 from __future__ import annotations
 
 import sqlite3
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 
 def format_ts(moment: datetime | None = None) -> str:
@@ -111,6 +111,25 @@ def recent_alerts(conn: sqlite3.Connection, limit: int = 50) -> list[sqlite3.Row
     return conn.execute(
         "SELECT * FROM alert ORDER BY created_at DESC, id DESC LIMIT ?", (limit,)
     ).fetchall()
+
+
+def alerts_per_hour(conn: sqlite3.Connection, end: datetime, hours: int = 24) -> list[int]:
+    """Number of alerts raised in each of the ``hours`` one-hour slots ending at ``end``.
+
+    Index 0 is the oldest hour and the last index the hour ending at ``end``.
+    """
+    start = end - timedelta(hours=hours)
+    counts = [0] * hours
+    rows = conn.execute(
+        "SELECT created_at FROM alert WHERE created_at >= ? AND created_at < ?",
+        (format_ts(start), format_ts(end)),
+    ).fetchall()
+    for r in rows:
+        moment = datetime.strptime(r["created_at"], "%Y-%m-%d %H:%M:%S.%f").replace(tzinfo=timezone.utc)
+        slot = int((moment - start).total_seconds() // 3600)
+        if 0 <= slot < hours:
+            counts[slot] += 1
+    return counts
 
 
 def get_user_by_username(conn: sqlite3.Connection, username: str) -> sqlite3.Row | None:
