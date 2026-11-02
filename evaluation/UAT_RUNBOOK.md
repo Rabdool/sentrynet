@@ -1,15 +1,15 @@
 # SentryNet — User Acceptance Test Runbook
 
 This runbook describes the formal lab User Acceptance Test (UAT) for SentryNet,
-following the attack-simulation methodology in Chapter Two (§2.2.7) and the
-deployment topology in Chapter Four (Figure 3.5). It is carried out on an
+following the testing methodology in Chapter Three (Section 3.7) and the
+deployment topology in Chapter Three (Figure 3.7). It is carried out on an
 **isolated lab network** that the operator owns and controls — never against
 systems you are not authorised to test.
 
 The automated harness in `run_evaluation.py` already exercises the detection
 pipeline end to end and records the metrics below; this runbook is the
 equivalent procedure driven by real attacker tooling (Nmap, Hydra) against the
-live honeypot, for the final report's evaluation chapter.
+live honeypot, for use when SentryNet is deployed in the laboratory.
 
 ## Topology (isolated lab segment)
 
@@ -46,7 +46,7 @@ production system.
 Record the wall-clock time each attack starts and the time the corresponding
 alert appears on the dashboard (detection latency).
 
-### UAT-1 — Port scan (Objective 6: port-scanning)
+### UAT-1 — Port scan (Objective 5: port-scanning)
 From the Attacker VM:
 ```
 nmap -sT -p 21,23,80,110,143,445,3306,3389 <honeypot-ip>
@@ -54,7 +54,7 @@ nmap -sT -p 21,23,80,110,143,445,3306,3389 <honeypot-ip>
 **Expected:** one `port_scan` alert naming the attacker IP; every probed port
 recorded in the attack log.
 
-### UAT-2 — Brute-force login (Objective 6: brute-force)
+### UAT-2 — Brute-force login (Objective 5: brute-force)
 From the Attacker VM, a dictionary attack against the emulated SSH service:
 ```
 hydra -l root -P wordlist.txt ssh://<honeypot-ip>
@@ -63,7 +63,7 @@ hydra -l root -P wordlist.txt ssh://<honeypot-ip>
 further attempts are logged but do not raise duplicate alerts until the alert
 is acknowledged.
 
-### UAT-3 — Unauthorized access (Objective 6: unauthorized access)
+### UAT-3 — Unauthorized access (Objective 5: unauthorized access)
 Let the brute-force run until Cowrie accepts one of its configured credentials
 (or connect manually with a credential in Cowrie's `userdb`).
 **Expected:** one `unauthorized_access` alert; the successful login and any

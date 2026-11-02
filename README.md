@@ -6,9 +6,9 @@ organizations, built on a Defense-in-Depth strategy.
 ## Layers
 - `honeypot/`  — decoy services (Cowrie / OpenCanary) that capture attacker interaction
 - `data/`      — centralized logging + alert engine (SQLite/MySQL)
-- `dashboard/` — authenticated Flask admin dashboard (presentation layer)
+- `dashboard/` — authenticated Flask admin dashboard: alert feed and reports (presentation layer)
 
-Status: all three layers implemented with tests; see Chapter Four.
+Status: all three layers implemented with tests; see Chapter Four of the project report.
 
 ## Running the dashboard
 Requires Python 3.10 or newer. Run every command from the `sentrynet/` folder.
@@ -54,12 +54,21 @@ created above. `create-admin` is only needed the first time; the account is
 stored in `sentrynet.db`. On later runs, activate the virtual environment, set
 the two variables and run the last command again.
 
+## Reports
+Open **Reports** from the dashboard menu, choose a date range and select
+**Generate**. The report summarises the period: events logged, attacker IPs,
+alerts by type and severity, the top attacker IP addresses and the services
+they targeted. **Export CSV** downloads the same figures for Excel, and
+**Print / PDF** gives a printable copy. Every generated report is recorded in
+the `report` table (who, which period, format, when) and listed under
+*Report history*. Report figures are always computed from the live logs.
+
 ## Tests
 ```
 python -m unittest discover -s tests
 ```
 
-## Evaluation (Objective 6)
+## Evaluation (Objective 5)
 ```
 python -m evaluation.run_evaluation
 ```

@@ -1,7 +1,7 @@
 # Evaluation
 
 Measures SentryNet's effectiveness at detecting the three attack classes in
-**Objective 6** — port-scanning, brute-force and unauthorized-access attempts —
+**Objective 5** — port-scanning, brute-force and unauthorized-access attempts —
 by driving the real detection pipeline (Cowrie adapter, decoy-port sensor,
 alert engine) with representative attack traffic.
 

@@ -4,11 +4,11 @@ Each honeypot event is scored against a small set of rules. Thresholds are
 configurable so an administrator can tune sensitivity to their tolerance for
 false alarms (Chapter Three, non-functional requirements).
 
-Detection rules (the three attack classes in Objective 6, plus post-login
+Detection rules (the three attack classes in Objective 5, plus post-login
 activity):
 
 * brute force         -- ``brute_force_threshold`` or more login attempts from
-                         one IP inside ``window_seconds`` (Listing 4.2: 4 in 60 s)
+                         one IP inside ``window_seconds`` (default: 4 in 60 s)
 * port scan           -- one IP opening sessions against ``port_scan_threshold``
                          or more distinct services inside ``window_seconds``
 * unauthorized access -- any successful login to a honeypot service; no real
@@ -17,7 +17,7 @@ activity):
 
 At most one *open* (unacknowledged) alert is kept per attacker IP per alert
 type: further matching events are still logged, but do not raise duplicates
-until the administrator acknowledges the existing alert (Listing 4.2).
+until the administrator acknowledges the existing alert.
 """
 from __future__ import annotations
 

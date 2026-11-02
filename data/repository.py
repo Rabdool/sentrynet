@@ -158,3 +158,104 @@ def has_open_alert(conn: sqlite3.Connection, src_ip: str, alert_type: str) -> bo
         (src_ip, alert_type),
     ).fetchone()
     return row is not None
+
+
+# --- reporting --------------------------------------------------------------
+
+def record_report(
+    conn: sqlite3.Connection, user_id: int, start: datetime, end: datetime, fmt: str = "html"
+) -> int:
+    """Record that ``user_id`` generated a report for [start, end) (audit trail)."""
+    cur = conn.execute(
+        "INSERT INTO report (user_id, period_start, period_end, format, generated_at)"
+        " VALUES (?, ?, ?, ?, ?)",
+        (user_id, format_ts(start), format_ts(end), fmt, _now()),
+    )
+    conn.commit()
+    return cur.lastrowid
+
+
+def recent_reports(conn: sqlite3.Connection, limit: int = 10) -> list[sqlite3.Row]:
+    return conn.execute(
+        """SELECT r.*, u.username
+             FROM report r JOIN user u ON u.id = r.user_id
+            ORDER BY r.generated_at DESC, r.id DESC LIMIT ?""",
+        (limit,),
+    ).fetchall()
+
+
+def report_summary(
+    conn: sqlite3.Connection, start: datetime, end: datetime, top: int = 10
+) -> dict:
+    """Summarise honeypot activity and alerts in the half-open period [start, end).
+
+    Computed live from attack_log, attack_session and alert so a report can
+    never disagree with the underlying records.
+    """
+    lo, hi = format_ts(start), format_ts(end)
+
+    events = conn.execute(
+        """SELECT COUNT(*) AS events, COUNT(DISTINCT s.src_ip) AS attackers
+             FROM attack_log l JOIN attack_session s ON s.id = l.session_id
+            WHERE l.logged_at >= ? AND l.logged_at < ?""",
+        (lo, hi),
+    ).fetchone()
+
+    events_by_type = conn.execute(
+        """SELECT event_type AS name, COUNT(*) AS n
+             FROM attack_log WHERE logged_at >= ? AND logged_at < ?
+            GROUP BY event_type ORDER BY n DESC, name""",
+        (lo, hi),
+    ).fetchall()
+
+    alert_rows = conn.execute(
+        "SELECT alert_type, severity, acknowledged FROM alert WHERE created_at >= ? AND created_at < ?",
+        (lo, hi),
+    ).fetchall()
+    by_severity = {"high": 0, "medium": 0, "low": 0}
+    by_type: dict[str, int] = {}
+    for a in alert_rows:
+        by_severity[a["severity"]] = by_severity.get(a["severity"], 0) + 1
+        by_type[a["alert_type"]] = by_type.get(a["alert_type"], 0) + 1
+    acknowledged = sum(1 for a in alert_rows if a["acknowledged"])
+
+    top_sources = conn.execute(
+        """SELECT s.src_ip AS ip,
+                  COUNT(*) AS events,
+                  COUNT(DISTINCT s.service_id) AS services,
+                  (SELECT COUNT(*)
+                     FROM alert a
+                     JOIN attack_log l2 ON l2.id = a.log_id
+                     JOIN attack_session s2 ON s2.id = l2.session_id
+                    WHERE s2.src_ip = s.src_ip
+                      AND a.created_at >= ? AND a.created_at < ?) AS alerts,
+                  MIN(l.logged_at) AS first_seen,
+                  MAX(l.logged_at) AS last_seen
+             FROM attack_log l JOIN attack_session s ON s.id = l.session_id
+            WHERE l.logged_at >= ? AND l.logged_at < ?
+            GROUP BY s.src_ip ORDER BY events DESC, ip LIMIT ?""",
+        (lo, hi, lo, hi, top),
+    ).fetchall()
+
+    services = conn.execute(
+        """SELECT h.name, h.protocol, h.port,
+                  COUNT(DISTINCT s.id) AS sessions, COUNT(l.id) AS events
+             FROM attack_log l
+             JOIN attack_session s ON s.id = l.session_id
+             JOIN honeypot_service h ON h.id = s.service_id
+            WHERE l.logged_at >= ? AND l.logged_at < ?
+            GROUP BY h.id ORDER BY events DESC, h.name""",
+        (lo, hi),
+    ).fetchall()
+
+    return {
+        "events": events["events"],
+        "attackers": events["attackers"],
+        "events_by_type": [dict(r) for r in events_by_type],
+        "alerts": len(alert_rows),
+        "acknowledged": acknowledged,
+        "by_severity": by_severity,
+        "by_type": sorted(by_type.items(), key=lambda kv: (-kv[1], kv[0])),
+        "top_sources": [dict(r) for r in top_sources],
+        "services": [dict(r) for r in services],
+    }
