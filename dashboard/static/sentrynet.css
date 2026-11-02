@@ -445,7 +445,9 @@ td.mono { font-family: var(--mono); }
 
 /* Printing a report (or saving it as PDF) gives plain black-on-white pages. */
 @media print {
-  body { background: #fff !important; color: #000 !important; }
+  :root { color-scheme: light; }
+  html, body { background: #fff !important; color: #000 !important; }
+  @page { margin: 14mm; }
   body::before, .no-print, .topbar .tabs, .who, .live { display: none !important; }
   .topbar { position: static; border: 0; background: none; padding: 0 0 12px; }
   .topbar .brand, .topbar .sub, .panel-head h2, .report h3, .report-figures span, .report-meta,
