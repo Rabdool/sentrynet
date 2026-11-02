@@ -1,4 +1,4 @@
--- SentryNet data layer schema (realises the ERD in Chapter Three, Figure 3.2)
+-- SentryNet data layer schema (realises the ERD in Chapter Three, Figure 3.6)
 CREATE TABLE IF NOT EXISTS honeypot_service (
     id          INTEGER PRIMARY KEY,
     name        TEXT NOT NULL,          -- e.g. 'cowrie-ssh', 'opencanary-http'
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS alert (
     acknowledged INTEGER DEFAULT 0
 );
 
--- Dashboard administrators (Chapter Four, Table 4.1). Passwords are bcrypt hashes.
+-- Dashboard administrators (Chapter Three, Table 3.3). Passwords are bcrypt hashes.
 CREATE TABLE IF NOT EXISTS user (
     id            INTEGER PRIMARY KEY,
     username      TEXT NOT NULL UNIQUE,

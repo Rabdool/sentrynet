@@ -8,7 +8,7 @@ organizations, built on a Defense-in-Depth strategy.
 - `data/`      — centralized logging + alert engine (SQLite/MySQL)
 - `dashboard/` — authenticated Flask admin dashboard: alert feed and reports (presentation layer)
 
-Status: all three layers implemented with tests; see Chapter Four.
+Status: all three layers implemented with tests; see Chapter Four of the project report.
 
 ## Running the dashboard
 Requires Python 3.10 or newer. Run every command from the `sentrynet/` folder.
@@ -68,7 +68,7 @@ the `report` table (who, which period, format, when) and listed under
 python -m unittest discover -s tests
 ```
 
-## Evaluation (Objective 6)
+## Evaluation (Objective 5)
 ```
 python -m evaluation.run_evaluation
 ```

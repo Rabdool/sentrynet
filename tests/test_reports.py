@@ -1,4 +1,4 @@
-"""Tests for the reporting module (Objective 4, FR10/FR11).
+"""Tests for the reporting module (Objective 4, FR11).
 
 Covers the summary query in the data layer, the Reports page and CSV export
 in the dashboard, and the REPORT audit trail. Run: python -m unittest discover -s tests

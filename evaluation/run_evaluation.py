@@ -1,4 +1,4 @@
-"""End-to-end detection evaluation for SentryNet (Objective 6).
+"""End-to-end detection evaluation for SentryNet (Objective 5).
 
 Drives the real detection pipeline — the Cowrie adapter, the decoy-port
 sensor and the alert engine — with representative attack traffic and records,
@@ -215,7 +215,7 @@ def _fmt(v) -> str:
 def main() -> int:
     results = run()
     w = 42
-    print("\nSentryNet detection evaluation (Objective 6)")
+    print("\nSentryNet detection evaluation (Objective 5)")
     print("=" * 78)
     print(f"{'Scenario':<{w}}{'Expect':<8}{'Alert':<7}{'#':<4}{'Latency':<9}{'Logged':<8}{'Result'}")
     print("-" * 78)

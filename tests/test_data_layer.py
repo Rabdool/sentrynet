@@ -90,7 +90,7 @@ class DataLayerTest(unittest.TestCase):
         ).fetchone()
         self.assertEqual(row["acknowledged"], 1)
 
-    # --- Chapter Four, Listing 4.2 / test case TC03 ---------------------
+    # --- alert thresholds and duplicate suppression (Chapter Three, Table 3.4) ---
 
     def _alerts_of(self, alert_type):
         return [a for a in repository.recent_alerts(self.conn) if a["alert_type"] == alert_type]

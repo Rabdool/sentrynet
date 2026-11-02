@@ -1,7 +1,7 @@
 """Password hashing for dashboard administrators.
 
-Uses bcrypt, as specified for ``user.password_hash`` in Chapter Four
-(Table 4.1). Plain-text passwords are never stored.
+Uses bcrypt, as specified for ``user.password_hash`` in Chapter Three
+(Table 3.3). Plain-text passwords are never stored.
 """
 from __future__ import annotations
 
