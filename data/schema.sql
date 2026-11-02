@@ -41,3 +41,15 @@ CREATE TABLE IF NOT EXISTS user (
     role          TEXT NOT NULL DEFAULT 'admin',
     last_login    TIMESTAMP
 );
+
+-- Audit trail of generated reports (Chapter Three, Table 3.3). The figures in a
+-- report are always computed live from attack_log and alert, so only the request
+-- itself is stored: who generated it, the period covered, the format and when.
+CREATE TABLE IF NOT EXISTS report (
+    id            INTEGER PRIMARY KEY,
+    user_id       INTEGER NOT NULL REFERENCES user(id),
+    period_start  TIMESTAMP NOT NULL,
+    period_end    TIMESTAMP NOT NULL,
+    format        TEXT NOT NULL DEFAULT 'html',  -- html | csv
+    generated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

@@ -14,6 +14,10 @@
         <div class="sub">Honeypot alert feed</div>
       </div>
       <span class="live"><span class="dot"></span>Monitoring</span>
+      <nav class="tabs" aria-label="Sections">
+        <a href="{{ url_for('index') }}" class="active" aria-current="page">Alert feed</a>
+        <a href="{{ url_for('reports') }}">Reports</a>
+      </nav>
     </div>
     <div class="who">
       <span>Signed in as <strong>{{ current_user['username'] }}</strong></span>

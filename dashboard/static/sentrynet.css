@@ -390,3 +390,70 @@ td.msg { min-width: 260px; }
   th, td { padding: 12px 14px; }
   .auth-card { padding: 30px 22px 24px; }
 }
+
+/* --- navigation and reports ------------------------------------------- */
+.tabs { display: flex; gap: 6px; }
+.tabs a {
+  padding: 7px 14px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--muted);
+  font: 600 12px/1 var(--mono);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.tabs a:hover { color: var(--text); border-color: var(--line); }
+.tabs a.active { color: var(--cyan); border-color: var(--line-strong); background: rgba(47, 224, 255, .08); }
+a.btn { display: inline-block; text-decoration: none; color: inherit; }
+
+.reports-page main > .panel { margin-bottom: 26px; }
+.report-form { display: flex; align-items: flex-end; gap: 18px; flex-wrap: wrap; padding: 20px 22px; }
+.report-form label { display: grid; gap: 6px; color: var(--muted); font: 600 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+.report-form input {
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--bg-2);
+  color: var(--text);
+  font: 14px var(--mono);
+}
+.report-form .btn-primary { width: auto; margin: 0; padding: 11px 22px; }
+.report-meta { margin: 0; padding: 14px 22px 0; color: var(--muted); font-size: 13px; }
+.report-figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  padding: 18px 22px;
+}
+.report-figures div {
+  --accent: var(--cyan);
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.report-figures div.high { --accent: var(--orange); }
+.report-figures div.medium { --accent: var(--violet); }
+.report-figures div.low { --accent: var(--green); }
+.report-figures span { display: block; margin-bottom: 4px; color: var(--accent); font: 700 26px/1 var(--mono); }
+.report h3 { margin: 22px 22px 10px; font: 700 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--text); }
+.report-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 18px; }
+td.mono { font-family: var(--mono); }
+@media (max-width: 700px) { .report-grid { grid-template-columns: 1fr; } }
+
+/* Printing a report (or saving it as PDF) gives plain black-on-white pages. */
+@media print {
+  body { background: #fff !important; color: #000 !important; }
+  body::before, .no-print, .topbar .tabs, .who, .live { display: none !important; }
+  .topbar { position: static; border: 0; background: none; padding: 0 0 12px; }
+  .topbar .brand, .topbar .sub, .panel-head h2, .report h3, .report-figures span, .report-meta,
+  .report-figures div, th, td, td.time { color: #000 !important; }
+  main { padding: 0; max-width: none; }
+  .panel, .report-figures div { border-color: #999 !important; background: none !important; box-shadow: none !important; }
+  .hud::before, .hud::after { display: none; }
+  th { background: #eee !important; }
+  th, td { border-bottom: 1px solid #ccc; padding: 6px 10px; }
+  tr { break-inside: avoid; }
+}
