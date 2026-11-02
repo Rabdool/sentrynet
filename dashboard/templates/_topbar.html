@@ -1,0 +1,21 @@
+{# Shared header: brand, section tabs, monitoring status and the signed-in user. #}
+<header class="topbar">
+  <div class="left">
+    <a class="brand-link" href="{{ url_for('index') }}">
+      <span class="brand">SentryNet</span>
+      <span class="sub">{{ subtitle }}</span>
+    </a>
+    <nav class="tabs" aria-label="Sections">
+      <a href="{{ url_for('index') }}"{% if active == 'feed' %} class="active" aria-current="page"{% endif %}>Alert feed</a>
+      <a href="{{ url_for('reports') }}"{% if active == 'reports' %} class="active" aria-current="page"{% endif %}>Reports</a>
+    </nav>
+  </div>
+  <div class="who">
+    <span class="live"><span class="dot"></span>Monitoring</span>
+    <span>Signed in as <strong>{{ current_user['username'] }}</strong></span>
+    <form method="post" action="{{ url_for('logout') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn btn-pill">Sign out</button>
+    </form>
+  </div>
+</header>

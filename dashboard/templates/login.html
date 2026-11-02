@@ -7,7 +7,8 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='sentrynet.css') }}">
 </head>
 <body class="auth-page">
-  <div class="radar backdrop" aria-hidden="true"><div class="sweep"></div></div>
+  <img class="backdrop" src="{{ url_for('static', filename='radar.svg') }}" alt="" aria-hidden="true">
+  <img class="auth-waves" src="{{ url_for('static', filename='waves.svg') }}" alt="" aria-hidden="true">
 
   <form class="auth-card hud" method="post" action="{{ url_for('login') }}">
     <svg class="shield" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

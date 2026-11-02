@@ -154,5 +154,32 @@ class DashboardTest(unittest.TestCase):
         self.assertNotEqual(again.exit_code, 0)
 
 
+    # --- alerts-per-hour line on the Open card (FR8) ---------------------
+
+    def test_alerts_per_hour_buckets_by_hour(self):
+        from datetime import datetime, timedelta, timezone
+        conn = db.get_connection(self.path)
+        now = datetime.now(timezone.utc)
+        log_id = conn.execute("SELECT id FROM attack_log").fetchone()["id"]
+        for hours_ago in (0.5, 2.5, 2.6, 30):
+            conn.execute(
+                "INSERT INTO alert (log_id, severity, message, created_at) VALUES (?, 'low', 'x', ?)",
+                (log_id, repository.format_ts(now - timedelta(hours=hours_ago))),
+            )
+        conn.commit()
+        counts = repository.alerts_per_hour(conn, now)
+        conn.close()
+        self.assertEqual(len(counts), 24)
+        self.assertEqual(counts[-1], 2)   # 0.5 h ago plus the alert seeded in setUp
+        self.assertEqual(counts[-3], 2)   # 2.5 h and 2.6 h ago
+        self.assertEqual(sum(counts), 4)  # 30 h ago is outside the window
+
+    def test_feed_shows_alert_rate_line(self):
+        self._login()
+        page = self.client.get("/").data.decode()
+        self.assertIn("Alerts per hour", page)
+        self.assertIn("<polyline", page)
+
+
 if __name__ == "__main__":
     unittest.main()

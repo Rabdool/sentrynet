@@ -7,61 +7,71 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='sentrynet.css') }}">
 </head>
 <body>
-  <header class="topbar">
-    <div class="left">
-      <div>
-        <h1 class="brand">SentryNet</h1>
-        <div class="sub">Honeypot alert feed</div>
-      </div>
-      <span class="live"><span class="dot"></span>Monitoring</span>
-      <nav class="tabs" aria-label="Sections">
-        <a href="{{ url_for('index') }}" class="active" aria-current="page">Alert feed</a>
-        <a href="{{ url_for('reports') }}">Reports</a>
-      </nav>
-    </div>
-    <div class="who">
-      <span>Signed in as <strong>{{ current_user['username'] }}</strong></span>
-      <form method="post" action="{{ url_for('logout') }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button type="submit" class="btn">Sign out</button>
-      </form>
-    </div>
-  </header>
+  {% set active, subtitle = 'feed', 'Honeypot alert feed' %}
+  {% include "_topbar.html" %}
 
   <main>
     <section class="stats" aria-label="Alert summary">
-      <div class="stat open hud">
-        <div class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="stat open">
         <div class="label">Open</div>
+        <svg class="deco top-right" width="80" height="20" viewBox="0 0 80 20" aria-hidden="true">
+          <rect x="0" y="3" width="44" height="3" rx="1"/><rect x="48" y="3" width="10" height="3" rx="1" opacity=".4"/>
+          <rect x="0" y="12" width="20" height="3" rx="1" opacity=".4"/><rect x="24" y="12" width="40" height="3" rx="1"/>
+        </svg>
         <div class="value">{{ counts.unacknowledged }}</div>
-        <div class="hint">Awaiting acknowledgement</div>
+        <figure class="spark" aria-label="Alerts per hour over the last 24 hours: {{ spark.total }} in total, at most {{ spark.peak }} in one hour">
+          <svg viewBox="0 0 {{ spark.width }} {{ spark.height }}" preserveAspectRatio="none" aria-hidden="true">
+            <defs><linearGradient id="sparkfill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="currentColor" stop-opacity=".35"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/>
+            </linearGradient></defs>
+            <polygon points="{{ spark.area }}" fill="url(#sparkfill)"/>
+            <polyline points="{{ spark.line }}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+          </svg>
+          <figcaption>Alerts per hour · last 24 h</figcaption>
+        </figure>
       </div>
-      <div class="stat high hud">
-        <div class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+
+      <div class="stat high">
         <div class="label">High</div>
+        <span class="corner tl" aria-hidden="true"></span><span class="corner tr" aria-hidden="true"></span>
+        <span class="corner bl" aria-hidden="true"></span><span class="corner br" aria-hidden="true"></span>
         <div class="value">{{ counts.high }}</div>
         <div class="hint">Critical activity</div>
       </div>
-      <div class="stat medium hud">
-        <div class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+
+      <div class="stat medium">
         <div class="label">Medium</div>
+        <svg class="deco top-right" width="90" height="16" viewBox="0 0 90 16" aria-hidden="true">
+          {% for i in range(10) %}<path d="M{{ i * 9 + 4 }} 1 L{{ i * 9 }} 15 L{{ i * 9 + 4 }} 15 L{{ i * 9 + 8 }} 1 Z"{% if i > 6 %} opacity=".35"{% endif %}/>{% endfor %}
+        </svg>
+        <svg class="deco ladder" width="14" height="96" viewBox="0 0 14 96" aria-hidden="true">
+          {% for i in range(12) %}<rect x="0" y="{{ i * 8 }}" width="14" height="4" rx="1"{% if i < 4 %} opacity=".3"{% endif %}/>{% endfor %}
+        </svg>
         <div class="value">{{ counts.medium }}</div>
         <div class="hint">Suspicious activity</div>
       </div>
-      <div class="stat low hud">
-        <div class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+
+      <div class="stat low">
         <div class="label">Low</div>
+        <svg class="deco top-right" width="80" height="8" viewBox="0 0 80 8" aria-hidden="true">
+          {% for i in range(16) %}<rect x="{{ i * 5 }}" y="0" width="3" height="8" transform="skewX(-25)"/>{% endfor %}
+        </svg>
         <div class="value">{{ counts.low }}</div>
         <div class="hint">Informational</div>
       </div>
     </section>
 
-    <section class="panel hud">
+    <section class="panel feed{% if not alerts %} is-empty{% endif %}">
       <div class="panel-head">
-        <h2>Alert feed</h2>
+        <div>
+          <h2>Alert feed{% if not alerts %} <span class="status">— No recent alerts detected. Monitoring network traffic…</span>{% endif %}</h2>
+          <div class="live-line"><span class="dot"></span>Live<i></i></div>
+        </div>
+        {% if alerts %}
         <div class="right">
           <span class="meta">{{ alerts|length }} recent alert{{ '' if alerts|length == 1 else 's' }}</span>
         </div>
+        {% endif %}
       </div>
 
       {% if alerts %}
@@ -92,10 +102,11 @@
         </table>
       </div>
       {% else %}
-      <div class="empty">
-        <div class="radar" aria-hidden="true"><div class="sweep"></div></div>
-        <p><strong>No alerts yet</strong>The honeypot layer hasn't reported any activity. Decoy services are being monitored.</p>
+      <div class="empty-scene" aria-hidden="true">
+        <img class="waves" src="{{ url_for('static', filename='waves.svg') }}" alt="">
+        <img class="radar-img" src="{{ url_for('static', filename='radar.svg') }}" alt="">
       </div>
+      <p class="sr-only">No alerts yet. The honeypot layer hasn't reported any activity; decoy services are being monitored.</p>
       {% endif %}
     </section>
   </main>
