@@ -174,7 +174,7 @@ a.btn { display: inline-block; text-decoration: none; }
 }
 .auth-page .backdrop {
   position: fixed;
-  width: min(780px, 130vw);
+  width: min(92vmin, 780px);
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
