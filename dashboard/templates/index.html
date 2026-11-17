@@ -64,12 +64,17 @@
     <section class="panel feed{% if not alerts %} is-empty{% endif %}">
       <div class="panel-head">
         <div>
-          <h2>Alert feed{% if not alerts %} <span class="status">— No recent alerts detected. Monitoring network traffic…</span>{% endif %}</h2>
+          <h2>Alert feed{% if not alerts %} <span class="status">— {% if total %}All alerts acknowledged.{% else %}No recent alerts detected.{% endif %} Monitoring network traffic…</span>{% endif %}</h2>
           <div class="live-line"><span class="dot"></span>Live<i></i></div>
         </div>
-        {% if alerts %}
+        {% if total %}
         <div class="right">
-          <span class="meta">{{ alerts|length }} recent alert{{ '' if alerts|length == 1 else 's' }}</span>
+          <span class="meta">{{ alerts|length }} {{ 'recent' if show_all else 'open' }} alert{{ '' if alerts|length == 1 else 's' }}</span>
+          {% if show_all %}
+            <a class="btn" href="{{ url_for('index') }}">Hide acknowledged</a>
+          {% else %}
+            <a class="btn" href="{{ url_for('index', show='all') }}">Show acknowledged</a>
+          {% endif %}
         </div>
         {% endif %}
       </div>
@@ -106,9 +111,14 @@
         <img class="waves" src="{{ url_for('static', filename='waves.svg') }}" alt="">
         <img class="radar-img" src="{{ url_for('static', filename='radar.svg') }}" alt="">
       </div>
-      <p class="sr-only">No alerts yet. The honeypot layer hasn't reported any activity; decoy services are being monitored.</p>
+      <p class="sr-only">{% if total %}No open alerts. Acknowledged alerts are kept and appear in Reports.{% else %}No alerts yet. The honeypot layer hasn't reported any activity; decoy services are being monitored.{% endif %}</p>
       {% endif %}
     </section>
   </main>
+  <script>
+    // Live feed: reload every 5 s so new honeypot alerts appear without a manual refresh.
+    // Skipped while the tab is in the background.
+    setInterval(function () { if (!document.hidden) location.reload(); }, 5000);
+  </script>
 </body>
 </html>
