@@ -192,8 +192,13 @@ def create_app(db_path: str | None = None, secret_key: str | None = None) -> Fla
             if not a["acknowledged"]:
                 counts["unacknowledged"] += 1
         hourly = repository.alerts_per_hour(get_conn(), datetime.now(timezone.utc))
+        # The feed is a work queue: acknowledged alerts drop out of it but stay in
+        # the database (and in Reports). ?show=all brings them back into view.
+        show_all = request.args.get("show") == "all"
+        shown = alerts if show_all else [a for a in alerts if not a["acknowledged"]]
         return render_template(
-            "index.html", alerts=alerts, counts=counts, hourly=hourly, spark=_sparkline(hourly)
+            "index.html", alerts=shown, total=len(alerts), show_all=show_all,
+            counts=counts, hourly=hourly, spark=_sparkline(hourly),
         )
 
     @app.route("/alerts/<int:alert_id>/ack", methods=["POST"])

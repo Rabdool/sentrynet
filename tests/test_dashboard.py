@@ -69,6 +69,24 @@ class DashboardTest(unittest.TestCase):
         conn.close()
         self.assertEqual(row["acknowledged"], 1)
 
+    def test_acknowledged_alert_leaves_feed_but_is_kept(self):
+        conn = db.get_connection(self.path)
+        alert_id = repository.recent_alerts(conn)[0]["id"]
+        conn.close()
+
+        self._login()
+        self.client.post(f"/alerts/{alert_id}/ack", data={"csrf_token": self._csrf("/")})
+
+        feed = self.client.get("/").data
+        self.assertNotIn(b"download observed from 10.0.0.5", feed)
+        self.assertIn(b"All alerts acknowledged", feed)
+        history = self.client.get("/?show=all").data
+        self.assertIn(b"download observed from 10.0.0.5", history)
+
+        conn = db.get_connection(self.path)
+        self.assertEqual(len(repository.recent_alerts(conn)), 1)  # still stored, not deleted
+        conn.close()
+
     def test_empty_database_renders_gracefully(self):
         fd, path = tempfile.mkstemp(suffix=".db")
         os.close(fd)
